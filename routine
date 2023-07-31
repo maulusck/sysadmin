@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -e
+
+# cron it with
+#  5 4 * * 0 /usr/local/bin/routine >> /var/log/sysupgrade.log 2>&1
+
+echo "###" && date && echo "###"
+
+# apt based
+if [ $(which apt 2>/dev/null ) ]; then
+	apt update	&& \
+	apt list --upgradable	&& \
+	apt full-upgrade -y	&& \
+	apt update && apt upgrade -y	&& \
+	apt update && apt full-upgrade -y	&& \
+	apt clean && apt autoclean
+# xbps based
+elif [ $(which xbps-install 2>/dev/null ) ]; then
+	xbps-install -Suvy && xbps-remove -fOovy	&& \
+	xbps-install -Suvy && xbps-remove -fOovy	&& \
+	vkpurge list
+# dnf based
+elif [ $(which dnf 2>/dev/null ) ]; then
+	dnf upgrade --refresh -y	&& \
+	dnf autoremove -y && dnf upgrade -y
+# apk based
+elif [ $(which apk 2>/dev/null ) ]; then
+	apk update && apk upgrade	&& \
+	apk update && apk upgrade
+fi
